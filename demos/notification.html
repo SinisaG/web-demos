@@ -149,12 +149,17 @@
         if (("Notification" in window) !== true) {
             alert("This browser does not support desktop notification. :/");
         }
+
         function notifyMe() {
             Notification.requestPermission().then((permission) => {
                 if (permission === "granted") {
                     let notification = spawnNotification('Thank you for enabeling notifications, we promise will not spam you and keep our information short, condensed and down to point!',
                         'https://www.homeday.de/assets/images/icons/icon_hdfavicon_64px.png',
-                        'Thank you!');
+                        'Thank you!',
+                        (e) => {
+                            e.preventDefault(); // prevent the browser from focusing the Notification's tab
+                            window.open('https://www.homeday.de', '_blank');
+                        });
                     document.getElementById('spam-button').style.display = 'inline-block';
                 }
             });
@@ -166,7 +171,11 @@
             let int = setInterval(() => {
                 spawnNotification('spam',
                 'https://www.homeday.de/assets/images/icons/icon_hdfavicon_64px.png',
-                `${i}) Spam`);
+                `${i}) Spam`,
+                (e) => {
+                    parent.focus();
+                    this.close();
+                });
                 i++;
                 if (i > 20) {
                     clearInterval(int);
@@ -174,12 +183,15 @@
             }, 100);
         }
 
-        function spawnNotification(body, icon, title) {
+        function spawnNotification(body, icon, title, action) {
             let options = {
                 body: body,
                 icon: icon
             };
             let n = new Notification(title, options);
+            if (action !== undefined) {
+                n.addEventListener('click', action);
+            }
         }
     </script>
 </body>
